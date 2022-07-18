@@ -1,0 +1,14 @@
+6b0a24ef1e58615967a86767ca3c4c76 *DESCRIPTION
+896723ce47a478c060eb7bee4c0e2904 *LICENSE
+afdbbe012eb8007cd0080390dcc15e78 *NAMESPACE
+628429b6993b09e127141dc75996e30d *NEWS.md
+0dd80848186bc74700093788ef41051b *R/create_dictionary.R
+c4d6a7e6451e01b278fc63d955c44cca *R/summarise_variable.R
+05ac63d914ad240c78bcd6433ef8ccd5 *R/utils.R
+4b2cbb0b26051f91f21ab4095d5b8824 *README.md
+5099c73f37f5f4be08e03dd4fe502695 *man/create_dictionary.Rd
+adf4134a7a64f98b599979b2b1a4c30b *man/mode_stat.Rd
+27e1e0a3134eed2231f36bbd59c18be2 *man/summarise_variable.Rd
+4807db09f6d3fd66c1ba4f4298701506 *tests/testthat.R
+7b369990df9ef8266edb3480e3aeb49e *tests/testthat/test-create_dictionary.R
+f9801903b0d87d3f112abae8c8f581e3 *tests/testthat/test-summarise_variable.R
