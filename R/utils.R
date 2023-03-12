@@ -200,8 +200,7 @@ times_summary <- function(dataset, column) {
   a <- as.data.frame(as.character(mean(dataset[[column]], na.rm = TRUE)))
   names(a)[1] <- "mean"
 
-  time_mode <- chron::as.times(mode_stat(dataset[[column]]))
-  a$mode = paste(time_mode, sep = ", ", collapse = " ")
+  a$median = as.character(median(dataset[[column]], na.rm = TRUE))
   a$min = as.character(min(dataset[[column]], na.rm = TRUE))
   a$max = as.character(max(dataset[[column]], na.rm = TRUE))
   a$missing = as.character(sum(is.na(dataset[[column]])))
@@ -268,6 +267,47 @@ label_summary <- function(dataset, column) {
 
   return(a)
 
+}
+
+difftimes_summary <- function(dataset, column) {
+
+  var <- dataset[[column]]
+
+  a <- as.data.frame(floor(mean(var, na.rm = TRUE)))
+  names(a)[1] <- "mean"
+
+  a$median = median(var, na.rm = TRUE)
+  a$min = min(var, na.rm = TRUE)
+  a$max = max(var, na.rm = TRUE)
+  a$missing = sum(is.na(dataset[[column]]))
+
+  a <- a %>%
+    pivot_longer(cols = everything(),
+                 names_to = "summary",
+                 values_to = "value",
+                 values_transform = list(value = as.character))
+
+  # pivot_longer creates a tibble which actually messes with output
+  a <- as.data.frame(a) # so coerce to df
+
+  a$item <- ""
+  a$item[1] <- gsub('"','', deparse(column))
+
+  a$class <- ""
+  a$class[1] <- paste(class(dataset[[column]]), sep = " ", collapse = " ")
+
+  a$label <- ""
+  a$label[1] <- ifelse(
+    is.null(attr(dataset[[column]], "label")),
+    "No label", attr(dataset[[column]], "label"))
+
+  vars <- c("item", "label", "class", "summary", "value")
+
+  a <- a[, vars]
+
+  a$value <- as.character(a$value)
+
+  return(a)
 }
 
 

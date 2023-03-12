@@ -32,7 +32,10 @@ Create a data dictionary from any dataset
 
  # You can also specify labels with a named vector
  iris.labels <- c(Sepal.Length = "Sepal length in mm",
-     Sepal.Width = "Sepal width in mm")
+     Sepal.Width = "Sepal width in mm",
+     Petal.Length = "Petal length in mm",
+     Petal.Width = "Petal width in mm",
+     Species = "Species of iris")
  create_dictionary(iris, var_labels = iris.labels)
 
 }

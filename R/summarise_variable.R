@@ -22,7 +22,7 @@ summarise_variable <- function(dataset, column) {
     factor_summary(dataset, column)
   } else if ( x[1] == "haven_labelled") {
     label_summary(dataset, column)
-  } else if ("POSIXt" %in% x) {
+  } else if ("POSIXt" %in% x | "Date" %in% x) {
     datetime_summary(dataset, column)
   } else if ("times" %in% x) {
     times_summary(dataset, column)
@@ -30,12 +30,13 @@ summarise_variable <- function(dataset, column) {
              "hms" %in% x |
              "ms" %in% x |
              "hm" %in% x) {
-    numeric_summary(dataset, column)
+    difftimes_summary(dataset, column)
   } else if ("numeric" %in% x ||
              "integer" %in% x ||
              "double" %in% x) {
     numeric_summary(dataset, column)
-  } else if (x %in% c("logical", "boolean")) {
+  } else if ("logical" %in% x |
+             "boolean" %in% x ) {
     logical_summary(dataset, column)
   } else {
     character_summary(dataset, column)

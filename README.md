@@ -1,35 +1,54 @@
 
-<!-- badges: start -->
+<!-- badges: start --> 
+[![CRAN
+status](https://www.r-pkg.org/badges/version/datadictionary)](https://cran.r-project.org/package=datadictionary)
 [![R-CMD-check](https://github.com/DoctorBJones/datadictionary/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/DoctorBJones/datadictionary/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/DoctorBJones/datadictionary/branch/main/graph/badge.svg)](https://app.codecov.io/gh/DoctorBJones/datadictionary?branch=main)
 <!-- badges: end -->
 
 # datadictionary
 
 The goal of `datadictionary` is to create a data dictionary from any
-dataset in your R environment. While other packages exist I found the
-output wasn’t able to be easily captured in a single view. They were
-either very long, such as many pages of output in word or pdf format, or
-very wide, such as concatenating all levels of factor variables in a
-single string. This package attempts to solve those problems by
-presenting summaries of the dataset in a format that fits easily in a
-pane or screen, without using word or pdf outputs. It also presents
-different summaries for different variable types.
+dataframe or tibble in your R environment. While other packages exist I
+found they were complicated to use and/or the output wasn’t what I was
+after. This package attempts to solve those problems by presenting
+tabular summaries of the dataset in a format that fits easily in a pane
+or screen, using a single line of code.
 
-It includes overall summaries of rows and columns and at-a-glance
-summaries of each variable including mean, median, min and max for
-numeric variables, counts in each level for factors, and the number of
-responses for character variables. All variable summaries include a
-count of missing values.
+It includes an overall summary of the dataset and at-a-glance summaries
+of each variable. All variables have a count of missing included, and
+different summaries are provided based on the data class.
 
-You can nominate one or more id variables, for example individuals and
-clusters, so you don’t get nonsense data summaries for these variables.
+For factors, labelled data and logicals the summary will include the
+name of each level with the level number in parentheses where
+appropriate. A value for the count of units in each level is included.
+
+For dates, integers and other numeric types of data the summary includes
+statistical summaries such as mean, median, mode, minimum and maximum. A
+value for each is included in the table.
+
+Character variables include only a count of unique values and missing
+values. This is the default so if you include a class of data that isn’t
+yet implemented you should get this output.
+
+You can nominate one or more identifier variables, for example
+individuals and clusters, so you only get a count of unique and missing
+values rather than nonsense numeric summaries.
+
 You can also include a vector to add labels if you want descriptions
-included in the document. You can opt for the output to write directly
-to Excel.
+included in the document. Lastly, you can opt for the output to write
+directly to Excel.
 
 ## Installation
 
-You can install the development version of datadictionary from
+You can install the current version of `datadictionary` from CRAN using:
+
+``` r
+install.packages("datadictionary")
+```
+
+You can install the development version of `datadictionary` from
 [GitHub](https://github.com/) with:
 
 ``` r
@@ -80,9 +99,10 @@ create_dictionary(esoph)
 esoph_dictionary <- create_dictionary(esoph)
 ```
 
-You can also specify one or more identifier variables. This is useful if
-you have hierarchical data, for example and have identifiers for
-individual, clusters or blocks.
+You specify one or more identifier variables by passing a quoted string
+or vector of quoted strings to `id_var`. This is useful if you have
+hierarchical data, for example and have identifiers for individuals,
+clusters or blocks.
 
 ``` r
 
@@ -155,50 +175,53 @@ create_dictionary(mtcars, id_var = c("id1", "id2"))
 #> 61                                           missing     0
 ```
 
-You can also optionally add labels for variables that have no labels.
-You can specify all columns or only a few. You need to pass a named
-vector where the names correspond to columns in your dataset.
+You can also optionally add labels for unlabelled variables. You need to
+pass a named vector to `var_labels` where the names correspond to
+columns in your dataset. The vector must be of the same length as your
+dataset.
 
 ``` r
 
 # Create labels as a named vector. 
-iris.labels <- c(Sepal.Length = "Sepal length in mm", Sepal.Width = "Sepal width in mm")
+iris.labels <- c(Sepal.Length = "Sepal length in mm",
+                 Sepal.Width = "Sepal width in mm",
+                 Petal.Length = "Petal length in mm",
+                 Petal.Width = "Petal width in mm",
+                 Species = "Species of iris")
 
 create_dictionary(iris, var_labels = iris.labels)
-#> Input object size:    7256 bytes;     5 variables     150 observations
-#> New object size: 8344 bytes; 5 variables 150 observations
-#>            item              label            class            summary value
-#> 1                                                      Rows in dataset   150
-#> 2                                                   Columns in dataset     5
-#> 3  Sepal.Length Sepal length in mm labelled numeric               mean     6
-#> 4                                                               median     6
-#> 5                                                                  min   4.3
-#> 6                                                                  max   7.9
-#> 7                                                              missing     0
-#> 8   Sepal.Width  Sepal width in mm labelled numeric               mean     3
-#> 9                                                               median     3
-#> 10                                                                 min     2
-#> 11                                                                 max   4.4
-#> 12                                                             missing     0
-#> 13 Petal.Length           No label          numeric               mean     4
-#> 14                                                              median     4
-#> 15                                                                 min     1
-#> 16                                                                 max   6.9
-#> 17                                                             missing     0
-#> 18  Petal.Width           No label          numeric               mean     1
-#> 19                                                              median     1
-#> 20                                                                 min   0.1
-#> 21                                                                 max   2.5
-#> 22                                                             missing     0
-#> 23      Species           No label           factor         setosa (1)    50
-#> 24                                                      versicolor (2)    50
-#> 25                                                       virginica (3)    50
-#> 26                                                             missing     0
+#>            item              label   class            summary value
+#> 1                                             Rows in dataset   150
+#> 2                                          Columns in dataset     5
+#> 3  Sepal.Length Sepal length in mm numeric               mean     6
+#> 4                                                      median     6
+#> 5                                                         min   4.3
+#> 6                                                         max   7.9
+#> 7                                                     missing     0
+#> 8   Sepal.Width  Sepal width in mm numeric               mean     3
+#> 9                                                      median     3
+#> 10                                                        min     2
+#> 11                                                        max   4.4
+#> 12                                                    missing     0
+#> 13 Petal.Length Petal length in mm numeric               mean     4
+#> 14                                                     median     4
+#> 15                                                        min     1
+#> 16                                                        max   6.9
+#> 17                                                    missing     0
+#> 18  Petal.Width  Petal width in mm numeric               mean     1
+#> 19                                                     median     1
+#> 20                                                        min   0.1
+#> 21                                                        max   2.5
+#> 22                                                    missing     0
+#> 23      Species    Species of iris  factor         setosa (1)    50
+#> 24                                             versicolor (2)    50
+#> 25                                              virginica (3)    50
+#> 26                                                    missing     0
 ```
 
 You can also write directly to Excel from the `create_dictionary`
-function if you pass a file path and name as a quoted string. There is
-no visible output for this use.
+function if you pass a file path and name as a quoted string to the
+`file` parameter. There is no visible output for this use.
 
 ``` r
 
@@ -206,7 +229,7 @@ create_dictionary(ChickWeight, file = "chickweight_dictionary.xlsx")
 ```
 
 The package also includes a function to create a summary of a single
-variable in your dataset.
+variable in your dataset. There are no other arguments to this function.
 
 ``` r
 
