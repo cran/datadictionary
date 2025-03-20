@@ -6,7 +6,6 @@
 #' @importFrom dplyr 'mutate'
 #' @importFrom tibble 'rownames_to_column'
 #' @importFrom chron 'as.times'
-#' @import magrittr
 
 
 factor_summary <- function(dataset, column) {
@@ -22,7 +21,7 @@ factor_summary <- function(dataset, column) {
   # this creates the factor level with it's value in parentheses
   # e.g. Strongly disagree (5)
 
-  a <- a %>%
+  a <- a |>
     dplyr::mutate(summary = paste(summary,
                                   " (",
                                   as.numeric(summary),
@@ -61,7 +60,7 @@ numeric_summary <- function(dataset, column) {
   a$max = round(max(var, na.rm = TRUE), digits = 2)
   a$missing = sum(is.na(dataset[[column]]))
 
-  a <- a %>%
+  a <- a |>
     pivot_longer(cols = everything(),
                  names_to = "summary",
                  values_to = "value",
@@ -99,7 +98,7 @@ character_summary <- function(dataset, column) {
 
   a$missing <- sum(is.na(var))
 
-  a <- a %>%
+  a <- a |>
     pivot_longer(cols = everything(), names_to = "summary")
 
   if (a$value[1] < 10) {
@@ -172,7 +171,7 @@ datetime_summary <- function(dataset, column) {
   a$max = as.character(max(var, na.rm = TRUE))
   a$missing = as.character(sum(is.na(dataset[[column]])))
 
-  a <- a %>%
+  a <- a |>
     pivot_longer(cols = everything(), names_to = "summary")
   a <- as.data.frame(a)
 
@@ -205,7 +204,7 @@ times_summary <- function(dataset, column) {
   a$max = as.character(max(dataset[[column]], na.rm = TRUE))
   a$missing = as.character(sum(is.na(dataset[[column]])))
 
-  a <- a %>%
+  a <- a |>
     pivot_longer(cols = everything(), names_to = "summary")
   a <- as.data.frame(a)
   # a$value <- as.Date(a$value, format = "%Y-%m-%d")
@@ -231,41 +230,54 @@ times_summary <- function(dataset, column) {
 
 
 label_summary <- function(dataset, column) {
-  label_values <-
-    as.data.frame(attributes(dataset[[column]])$labels) %>%
-    rownames_to_column()
 
-  names(label_values)[1] <- "label"
-  names(label_values)[2] <- "value"
+  if (length(unique(dataset[[column]])) ==
+      length(attr(dataset[[column]], "labels"))) {
 
-  label_values$summary <-
-    paste(label_values$label, " (", label_values$value, ")",
-          sep = "")
+    label_values <-
+      as.data.frame(attributes(dataset[[column]])$labels) |>
+      tibble::rownames_to_column()
 
-  a <- as.data.frame(table(dataset[[column]]))
-  names(a)[1] <- "num_val"
-  names(a)[2] <- "value"
+    names(label_values)[1] <- "label"
+    names(label_values)[2] <- "value"
 
-  a <- merge(a, label_values, by.x = "num_val", by.y = "value")
+    label_values$summary <-
+      paste(label_values$label, " (", label_values$value, ")",
+            sep = "")
 
-  a$item <- ""
-  a$item[1] <- gsub('"', '', deparse(column))
+    a <- as.data.frame(table(dataset[[column]]))
+    names(a)[1] <- "num_val"
+    names(a)[2] <- "value"
 
-  a$class <- ""
-  a$class[1] <-
-    paste(class(dataset[[column]]), sep = " ", collapse = " ")
+    a <- merge(a, label_values, by.x = "num_val", by.y = "value")
 
-  a$label <- ""
-  a$label[1] <- ifelse(is.null(attr(dataset[[column]], "label")),
-                       "No label", attr(dataset[[column]], "label"))
+    a$item <- ""
+    a$item[1] <- gsub('"', '', deparse(column))
 
-  vars <- c("item", "label", "class", "summary", "value")
-  a <- a[, vars]
-  a[nrow(a) + 1, ] <-
-    c("", "", "", "missing", sum(is.na(dataset[[column]])))
-  a$value <- as.character(a$value)
+    a$class <- ""
+    a$class[1] <-
+      paste(class(dataset[[column]]), sep = " ", collapse = " ")
 
-  return(a)
+    a$label <- ""
+    a$label[1] <- ifelse(is.null(attr(dataset[[column]], "label")),
+                         "No label", attr(dataset[[column]], "label"))
+
+    vars <- c("item", "label", "class", "summary", "value")
+    a <- a[, vars]
+    a[nrow(a) + 1, ] <-
+      c("", "", "", "missing", sum(is.na(dataset[[column]])))
+    a$value <- as.character(a$value)
+
+    return(a)
+
+  } else {
+
+    msg <- paste0(column, " has different numbers of labels and levels. It has been treated as numeric")
+    warning(msg)
+
+    numeric_summary(dataset = dataset, column = column)
+
+  }
 
 }
 
@@ -281,7 +293,7 @@ difftimes_summary <- function(dataset, column) {
   a$max = max(var, na.rm = TRUE)
   a$missing = sum(is.na(dataset[[column]]))
 
-  a <- a %>%
+  a <- a |>
     pivot_longer(cols = everything(),
                  names_to = "summary",
                  values_to = "value",
@@ -336,7 +348,7 @@ allna_summary <- function(dataset, column) {
                    "No label", attr(dataset[[column]], "label")),
     class = paste(class(dataset[[column]]), sep = " ", collapse = " "),
     summary = "missing",
-    value = length(dataset[[column]])
+    value = as.character(length(dataset[[column]]))
   )
 }
 
@@ -348,7 +360,7 @@ dataset_summary <- function(dataset) {
   names(a)[1] <- "Rows in dataset"
   names(a)[2] <- "Columns in dataset"
 
-  a <- a %>%
+  a <- a |>
     pivot_longer(cols = everything(), names_to = "summary")
   a <- as.data.frame(a)
 
